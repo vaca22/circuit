@@ -323,6 +323,7 @@ M▶R;
 IF M≠Q AND X==1  THEN
     H:=H+1;
 小的放前面。
+这样统一， 方便POS查找
     IF M<Q THEN
     r:={M,Q};
     ELSE
@@ -378,20 +379,31 @@ S:=S+1;
 Po(S):=ga;
 END;
 END;
+
+绘制电阻， 一根线， 一个矩形
 FOR K FROM 1 TO H DO
 LINE_P(G1,Po(Li(K,1)),Po(Li(K,2)),#0h);
 FILLPOLY_P(G1,ff(a,b,Po(Li(K,1)),Po(Li(K,2))),#FF00FFh)
 END;
+
+
+绘制正负级
 ARC_P(G1,Po(1),10,{#FFFF00h,#FFFF00h});
 TEXTOUT_P("+",G1,Po(1)-(5,13),7,#FFh);
 ARC_P(G1,Po(2),10,{#FFFF00h,#FFFF00h});
 TEXTOUT_P("-",G1,Po(2)-(5,13),7,#FFh);
+
+绘制电阻节点
 FOR K FROM 3 TO S DO
 ARC_P(G1,Po(K),5,{#70FFh,#70FFh});
 END;
+
+绘制选择的小圈圈
 IF R≠0 THEN
 ARC_P(G1,Po(R),12,#0h);
 END;
+
+如果删除del,删除节点
 IF A==19 AND R≠0 THEN
 Po:=SUPPRESS(Po,R);
 S:=S-1;
@@ -399,18 +411,26 @@ L:=SIZE(Li);
 L2:={};
 FOR K FROM 1 TO L DO
 Z:=0;
+
+遍历查找有此点的污染
 FOR J FROM 1 TO 2 DO
 IF Li(K,J)==R THEN
 Z:=1;
 END;
 END;
+
+添加到污染指标中
 IF Z==1 THEN
 L2(0):=K;
 END;
+
 END;
 IF (F:=SIZE(L2))≠0 THEN
+去除
 Li:=SUPPRESS(Li,L2);
 D:=SIZE(Li);
+
+指标锐减
 FOR K FROM 1 TO D DO
 FOR J FROM 1 TO 2 DO
 IF Li(K,J)>R THEN
@@ -418,10 +438,15 @@ Li(K,J):=Li(K,J)-1;
 END;
 END;
 END;
+
+总量
 H:=H-F;
 END;
+
 R:=0;
 END;
+
+如果按了紫色， 好， 那就计算出来
 IF t==1 THEN
 gg:=Rec(Li,Lib);
 t:=0;
