@@ -13,15 +13,44 @@ class MainActivity : AppCompatActivity() {
 
 
 /*
+
+先来看看基尔霍夫定律
+有电压 分压
+有电流 分流
+
+
+节点是分流的
+杆子是分压的
+节点流入和流出的 总和和0
+
+环路的电压为0
+两个节点之间任意一条路径， 电压压降都相等。
+现在我们要计算各个的电压比例， 电流比例
+从而求出总电阻的值
+是总电压除以总电流。
+
+
 Rec(Li,Red)
 BEGIN
+
+判断数组是否为0
+Li是线数组
+
 IF SIZE(Li)==0 THEN
 RETURN 0;
 END;
+
+
+
+
 LOCAL Cu:={},He:={},Fu:={},Fux:=1;
 LOCAL Fu2:={},Fu2x:=1;
 LOCAL a,b,c:=1,d,f;
 LOCAL s,ss;
+
+
+找出Li中的最大值
+
 1▶M;
 FOR K FROM 1 TO SIZE(Li)  DO
 FOR J FROM 1 TO 2 DO
@@ -30,17 +59,27 @@ M:=Li(K,J);
 END;
 END;
 END;
+
+
+有最大值个元素
+我怀疑是
+
 Cu:=MAKELIST({},K,1,M);
 FOR K FROM 1 TO SIZE(Li)  DO
 FOR J FROM 1 TO 2 DO
 Cu(Li(K,J),0):=Li(K,3-J);
 END;
 END;
+
+
+
 M1:=[[0]];
 LOCAL v:=[0];
 FOR K FROM 1 TO SIZE(Li) DO
 v(K):=0;
 END;
+
+
 FOR K FROM 3 TO M DO
 ss:=Cu(K);
 s:=SIZE(ss);
@@ -139,6 +178,8 @@ RETURN 0;
 END;
 RETURN U/I;
 END;
+
+
 SE(a,b,d)
 BEGIN
 LOCAL c:=(a+b)/2;
@@ -148,12 +189,19 @@ ELSE
 RETURN 0;
 END;
 END;
+
+
+
 SH(aa)
 BEGIN
 LOCAL Tou;
+
+等到手指抬起
 REPEAT
 Tou:=MOUSE();
 UNTIL SIZE(Tou(1))==0;
+
+
 A:=−1;
 RECT_P(G1,(120,0),(320,27),#A000A0h);
 TEXTOUT_P(aa+"  Ω",G1,120,0,7,#FF00h,100,#A000A0h);
@@ -179,6 +227,7 @@ TEXTOUT_P(s+"  Ω",G1,120,0,7,#FF00h,100,#A000A0h);
 BLIT_P(G1);
 END;
 ELSE
+小数点
 IF A==48 THEN
 z:=1;
 END;
@@ -190,27 +239,52 @@ ELSE
 RETURN s;
 END;
 END;
+
+
+
 ff(a,b,c,d)
 BEGIN
 LOCAL m:={},x,y,z;
+
+中点
 x:=(c+d)/2;
+
+从D指向C的单位向量。
 y:=(c-d)/ABS(c-d);
+
+旋转90度
 z:=y*;
+
+a,b是矩形的长和宽
 m(1):=x+y*a+z*b;
 m(2):=x+y*a-z*b;
 m(3):=x-y*a-z*b;
 m(4):=x-y*a+z*b;
+
+返回矩形的四个顶点
 RETURN m;
 END;
+
+
+
 EXPORT Rex2()
 BEGIN
 R:=0;
+输入电阻的10个数字
 L5:={47,42,43,44,37,38,39,32,33,34};
+双缓存界面
 DIMGROB_P(G1,320,240);
 DIMGROB_P(G2,320,240);
+
+G2是背景， 顶部的紫色矩形。
 RECT_P(G2,#FFFFFFh);
 RECT_P(G2,(120,0),(200,26),#A000A0h);
 ARC_P(G2,(100,15),15,{#FF0000h,#FF0000h});
+
+Lib是一个32个元素的数组。不， 其实它是个电阻数组， 是可以扩充的
+
+
+Po是一个节点数组， 最开始的两个节点是正极和负极。之后的是电阻节点。
 LOCAL Po:={(280,120),(30,120)};
 LOCAL Li:={},Lix:={},Lib:=MAKELIST(0,K,1,32);
 LOCAL gg;
@@ -223,46 +297,67 @@ WHILE  A≠4 DO
 A:=GETKEY;
 Tou:=MOUSE();
 IF SIZE(Tou(1)) THEN
+
+触发紫色矩形
 IF Tou(1,1)>120 AND Tou(1,1)<200  AND Tou(1,2)>0 AND Tou(1,2)<27 THEN
 t:=1;
 END;
+
+触发选择电阻节点
 ga:=(Tou(1,1),Tou(1,2));
 IF ABS(ga-(100,15))≤15 THEN
 NE:=1;
 END;
+
+收集当前触点与各个节点的距离。
 IF NE==0 THEN
 L1:=ABS(ga-Po);
 N:=MIN(L1);
+如果距离足够近
 IF N≤15 THEN
+找到它的位置
 M:=POS(L1,N);
 M▶R;
+
+选了两个了
 IF M≠Q AND X==1  THEN
-H:=H+1;
-IF M<Q THEN
-r:={M,Q};
-ELSE
-r:={Q,M};
+    H:=H+1;
+小的放前面。
+    IF M<Q THEN
+    r:={M,Q};
+    ELSE
+    r:={Q,M};
+    END;
+如果这根线存在了
+    IF (Y:=POS(Li,r))≠0 THEN
+    删除
+    Li:=SUPPRESS(Li,Y);
+    之前提前加了一， 现在减去2
+    H:=H-2;
+    ELSE
+    增加线
+    Li(H):=r;
+    END;
 END;
-IF (Y:=POS(Li,r))≠0 THEN
-Li:=SUPPRESS(Li,Y);
-H:=H-2;
-ELSE
-Li(H):=r;
-END;
-END;
+
+当前有选择了。
 X:=1;
 ELSE
 R:=0;
+当前没选择节点了。
 X:=0;
 T:=SIZE(Li);
 IF T≠0 THEN
+遍历每根线找到中点
 FOR K FROM 1 TO T DO
 Lix(K):=(Po(Li(K,1))+Po(Li(K,2)))/2;
 END;
 L4:=ABS(ga-Lix);
 D:=MIN(L4);
+如果有选择电阻以便输入阻值
 IF D<15 THEN
 C:=POS(L4,D);
+绘制一个圆形圈住电阻
 ARC_P(G1,Lix(C),12,#0h);
 Lib(C):=SH(Lib(C));
 END;
